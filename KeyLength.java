@@ -34,14 +34,13 @@ public class KeyLength {
             double averageChiSquared = chiSquaredSum / keyLength;
 
             // Update the likely key length based on the index of coincidence or chi-squared statistic
-            if (averageIndexOfCoincidence > maxIndexOfCoincidence) {
-                maxIndexOfCoincidence = averageIndexOfCoincidence;
-                likelyKeyLength = keyLength;
-            }
-            if (averageChiSquared < minChiSquared) {
-                minChiSquared = averageChiSquared;
-                likelyKeyLength = keyLength;
-            }
+            double sumOfIndices = averageIndexOfCoincidence + averageChiSquared;
+
+        if (sumOfIndices < (maxIndexOfCoincidence + minChiSquared)) {
+            maxIndexOfCoincidence = averageIndexOfCoincidence;
+            minChiSquared = averageChiSquared;
+            likelyKeyLength = keyLength;
+        }
         }
         System.out.println("\nKey legth:" + likelyKeyLength);
         return likelyKeyLength;
