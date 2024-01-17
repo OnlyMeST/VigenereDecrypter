@@ -1,3 +1,15 @@
+public static String decryptVigenere(String ciphertext, int key) {
+        StringBuilder decryptedText = new StringBuilder();
+        for (int i = 0; i < ciphertext.length(); i++) {
+            char encryptedChar = ciphertext.charAt(i);
+            char keyChar = (char) ((encryptedChar - key + 26) % 26 + 'A');
+            decryptedText.append(keyChar);
+        }
+        return decryptedText.toString();
+    }
+
+
+
 String ciphertext = "YOUR_CIPHERTEXT_HERE";
         int keyLength = VigenereUtils.findKeyLength(ciphertext);
 
