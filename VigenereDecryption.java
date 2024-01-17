@@ -1,5 +1,7 @@
 package vigenere;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class VigenereDecryption {
@@ -47,21 +49,24 @@ public class VigenereDecryption {
     }
 
     private static char findKeyCharacter(String subtext) {
-        Chi chi = new Chi();
-        double minChiSquared = Double.MAX_VALUE;
-        char bestKeyChar = 'a';
+        Map<Character, Integer> frequencyMap = new HashMap<>();
+        int maxFrequency = 0;
+        char mostFrequentChar = 'a';
 
-        for (char candidate = 'a'; candidate <= 'z'; candidate++) {
-            String repeatedKeyChar = String.valueOf(candidate).repeat(subtext.length());
-            double chiSquared = chi.calculateChi(decryptVigenere(subtext, repeatedKeyChar));
-            
-            if (chiSquared < minChiSquared) {
-                minChiSquared = chiSquared;
-                bestKeyChar = candidate;
+        for (char c : subtext.toCharArray()) {
+            if (Character.isLetter(c)) {
+                c = Character.toLowerCase(c);
+                frequencyMap.put(c, frequencyMap.getOrDefault(c, 0) + 1);
+                int currentFrequency = frequencyMap.get(c);
+                if (currentFrequency > maxFrequency) {
+                    maxFrequency = currentFrequency;
+                    mostFrequentChar = c;
+                }
             }
         }
 
-        return bestKeyChar;
+        char estimatedKeyChar = (char) ((mostFrequentChar - 'e' + 26) % 26 + 'a');
+        return estimatedKeyChar;
     }
 
     private static String decryptVigenere(String cipherText, String key) {
