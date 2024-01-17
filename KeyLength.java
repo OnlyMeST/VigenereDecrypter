@@ -1,53 +1,40 @@
-package vigenere;
-
-public class KeyLength {
-    private CoincidenceIndex coincidenceIndex = new CoincidenceIndex();
-    private Chi chi = new Chi();
-
-    public int findKeyLength(String cipherText) {
-        int maxLength = 20; // You can adjust this based on the expected maximum key length
-
-        double minDiff = Double.MAX_VALUE;
-        int keyLength = 1;
-
-        for (int i = 1; i <= maxLength; i++) {
-            String[] subtexts = getSubtexts(cipherText, i);
-            double averageIndex = calculateAverageIndex(subtexts);
-
-            double chiSquaredSum = 0;
-            for (String subtext : subtexts) {
-                chiSquaredSum += chi.calculateChi(subtext);
-            }
-            double averageChiSquared = chiSquaredSum / i;
-
-            double difference = Math.abs(averageIndex - averageChiSquared);
-
-            if (difference < minDiff) {
-                minDiff = difference;
-                keyLength = i;
-            }
-        }
-
-        return keyLength;
-    }
-
-    private String[] getSubtexts(String cipherText, int keyLength) {
-        String[] subtexts = new String[keyLength];
+int findKeyLength(String ciphertext) {
+    double maxIndexOfCoincidence = 0;
+    double minChiSquared = Double.MAX_VALUE;
+    int likelyKeyLength = 0;
+    for (int keyLength = 1; keyLength <= MAX_KEY_LENGTH; keyLength++) {
+        StringBuilder[] substrings = new StringBuilder[keyLength];
         for (int i = 0; i < keyLength; i++) {
-            StringBuilder sb = new StringBuilder();
-            for (int j = i; j < cipherText.length(); j += keyLength) {
-                sb.append(cipherText.charAt(j));
-            }
-            subtexts[i] = sb.toString();
+            substrings[i] = new StringBuilder();
         }
-        return subtexts;
-    }
+        for (int i = 0; i < ciphertext.length(); i++) {
+            substrings[i % keyLength].append(ciphertext.charAt(i));
+        }
+        // Calculate the index of coincidence for each substring
+        double indexOfCoincidenceSum = 0;
+        for (StringBuilder substring : substrings) {
+            double indexOfCoincidence = calculateIndexOfCoincidence(substring.toString());
+            indexOfCoincidenceSum += indexOfCoincidence;
+        }
+        double averageIndexOfCoincidence = indexOfCoincidenceSum / keyLength;
 
-    private double calculateAverageIndex(String[] subtexts) {
-        double sum = 0;
-        for (String subtext : subtexts) {
-            sum += coincidenceIndex.calculateIndex(subtext);
+        // Calculate the chi-squared statistic for each substring
+        double chiSquaredSum = 0;
+        for (StringBuilder substring : substrings) {
+            double chiSquared = calculateChiSquared(substring.toString());
+            chiSquaredSum += chiSquared;
         }
-        return sum / subtexts.length;
+        double averageChiSquared = chiSquaredSum / keyLength;
+
+        // Update the likely key length based on the index of coincidence or chi-squared statistic
+        if (averageIndexOfCoincidence > maxIndexOfCoincidence) {
+            maxIndexOfCoincidence = averageIndexOfCoincidence;
+            likelyKeyLength = keyLength;
+        }
+        if (averageChiSquared < minChiSquared) {
+            minChiSquared = averageChiSquared;
+            likelyKeyLength = keyLength;
+        }
     }
+    return likelyKeyLength;
 }
